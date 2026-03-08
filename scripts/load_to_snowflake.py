@@ -11,9 +11,9 @@ from snowflake.connector.pandas_tools import write_pandas
 
 # ── Snowflake connection config ────────────────────────────────────────────────
 SNOWFLAKE = dict(
-    account="LSZAHTZ-YB27785",
+    account="",
     user="ADARSH",
-    password="KasulaSai2023@",
+    password="",
     role="ACCOUNTADMIN",
     warehouse="COMPUTE_WH",
     database="ICD10_DB",
