@@ -1,0 +1,159 @@
+version: 2
+
+models:
+  - name: mart_patient_risk_scores
+    description: Beneficiary-level risk scoring output combining HCC burden and demographic adjustments.
+    columns:
+      - name: beneficiary_id
+        description: Synthetic beneficiary identifier.
+        tests:
+          - not_null
+          - unique
+      - name: sex_code
+        description: Beneficiary sex code from source enrollment data.
+      - name: race_code
+        description: Beneficiary race code from source enrollment data.
+      - name: birth_date
+        description: Beneficiary date of birth.
+      - name: age_years
+        description: Beneficiary age in whole years at runtime.
+      - name: unique_hcc_count
+        description: Number of distinct HCC v28 categories observed for the beneficiary.
+      - name: hcc_component_score
+        description: Sum of HCC coefficients before demographic adjustment.
+      - name: demographic_adjustment
+        description: Added demographic risk component.
+      - name: total_hcc_score
+        description: Total risk score used for risk-tier assignment.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                strictly: false
+      - name: risk_tier
+        description: Risk bucket derived from configurable dbt thresholds.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['low', 'medium', 'high', 'very_high']
+      - name: top_hccs
+        description: Comma-separated list of top beneficiary HCC categories by frequency.
+
+  - name: mart_high_cost_conditions
+    description: Diagnosis-level condition cost ranking with configurable high-cost threshold flag.
+    columns:
+      - name: diagnosis_code
+        description: ICD diagnosis code (mapped ICD-10 where available).
+        tests:
+          - not_null
+          - unique
+      - name: diagnosis_rows
+        description: Number of diagnosis rows contributing to the condition aggregate.
+      - name: beneficiaries
+        description: Distinct beneficiary count for the diagnosis.
+      - name: claims
+        description: Distinct claim count for the diagnosis.
+      - name: total_allocated_cost
+        description: Total allocated claim cost for the diagnosis.
+      - name: avg_allocated_cost
+        description: Average allocated claim cost for the diagnosis.
+      - name: high_cost_cutoff
+        description: Percentile-based cost cutoff calculated from dbt var high_cost_percentile.
+      - name: is_high_cost
+        description: Boolean flag indicating whether diagnosis exceeds cutoff.
+        tests:
+          - not_null
+      - name: cost_rank
+        description: Rank by descending total allocated condition cost.
+
+  - name: mart_diagnosis_category_summary
+    description: CCSR category-level aggregate of diagnosis and cost metrics.
+    columns:
+      - name: ccsr_category
+        description: Primary CCSR category (UNMAPPED for missing mappings).
+        tests:
+          - not_null
+          - unique
+      - name: diagnosis_rows
+        description: Number of diagnosis rows in category.
+      - name: beneficiaries
+        description: Distinct beneficiary count in category.
+      - name: claims
+        description: Distinct claim count in category.
+      - name: total_allocated_cost
+        description: Total allocated cost in category.
+      - name: avg_allocated_cost
+        description: Average allocated diagnosis cost in category.
+      - name: ccsr_mapped_rows
+        description: Count of diagnosis rows with valid CCSR match.
+      - name: hcc_mapped_rows
+        description: Count of diagnosis rows with valid HCC match.
+
+  - name: mart_risk_tier_cohorts
+    description: Cohort summaries by risk tier and demographics.
+    columns:
+      - name: cohort_id
+        description: Deterministic hash key for cohort grain.
+        tests:
+          - not_null
+          - unique
+      - name: risk_tier
+        description: Risk tier for the cohort.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['low', 'medium', 'high', 'very_high']
+      - name: sex_code
+        description: Sex segment of the cohort.
+      - name: race_code
+        description: Race segment of the cohort.
+      - name: age_band
+        description: Age bucket segment of the cohort.
+      - name: beneficiary_count
+        description: Number of beneficiaries in the cohort.
+      - name: avg_total_hcc_score
+        description: Average total risk score in cohort.
+      - name: min_total_hcc_score
+        description: Minimum total risk score in cohort.
+      - name: max_total_hcc_score
+        description: Maximum total risk score in cohort.
+
+  - name: mart_revenue_leakage_flags
+    description: Claim-level leakage indicators comparing claim coding to beneficiary HCC history.
+    columns:
+      - name: claim_pk
+        description: Deterministic claim key.
+        tests:
+          - not_null
+          - unique
+      - name: claim_id
+        description: Source claim identifier.
+      - name: beneficiary_id
+        description: Beneficiary identifier for the claim.
+      - name: claim_type
+        description: Claim source type (inpatient, outpatient, carrier).
+      - name: claim_from_date
+        description: Earliest claim service date.
+      - name: claim_thru_date
+        description: Latest claim service date.
+      - name: diagnosis_rows
+        description: Diagnosis row count within claim.
+      - name: mapped_rows
+        description: Count of diagnosis rows mapped from ICD-9 to ICD-10.
+      - name: hcc_matched_rows
+        description: Count of diagnosis rows with HCC mapping.
+      - name: missing_hcc_count
+        description: Number of beneficiary historical HCCs missing from this claim.
+      - name: missing_hcc_categories
+        description: List of missing HCC categories for review.
+      - name: is_potential_revenue_leakage
+        description: Boolean leakage flag based on mapping and missing-historical-HCC logic.
+      - name: leakage_reason
+        description: Categorical reason code for leakage decision.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['no_icd10_mapping', 'hcc_captured', 'missing_hcc_vs_history', 'review_needed']

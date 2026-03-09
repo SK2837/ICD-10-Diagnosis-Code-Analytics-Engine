@@ -1,0 +1,88 @@
+version: 2
+
+models:
+  - name: stg_beneficiaries
+    columns:
+      - name: beneficiary_pk
+        tests:
+          - not_null
+          - unique
+      - name: beneficiary_id
+        tests:
+          - not_null
+
+  - name: stg_claims_inpatient
+    columns:
+      - name: claim_pk
+        tests:
+          - not_null
+          - unique
+      - name: beneficiary_id
+        tests:
+          - not_null
+      - name: claim_id
+        tests:
+          - not_null
+
+  - name: stg_claims_outpatient
+    columns:
+      - name: claim_pk
+        tests:
+          - not_null
+          - unique
+      - name: beneficiary_id
+        tests:
+          - not_null
+      - name: claim_id
+        tests:
+          - not_null
+
+  - name: stg_claims_carrier
+    columns:
+      - name: claim_pk
+        tests:
+          - not_null
+          - unique
+      - name: beneficiary_id
+        tests:
+          - not_null
+      - name: claim_id
+        tests:
+          - not_null
+
+  - name: stg_icd10_codes
+    columns:
+      - name: icd10_code
+        tests:
+          - not_null
+          - unique
+          - dbt_expectations.expect_column_values_to_match_regex:
+              arguments:
+                regex: '^[A-Z0-9\\.]{3,8}$'
+
+  - name: stg_ccs_mappings
+    columns:
+      - name: icd10_code
+        tests:
+          - not_null
+          - unique
+          - dbt_expectations.expect_column_values_to_match_regex:
+              arguments:
+                regex: '^[A-Z0-9\\.]{3,8}$'
+
+  - name: stg_hcc_mappings
+    columns:
+      - name: icd10_code
+        tests:
+          - not_null
+          - unique
+          - dbt_expectations.expect_column_values_to_match_regex:
+              arguments:
+                regex: '^[A-Z0-9\\.]{3,8}$'
+
+  - name: stg_hcc_coefficients
+    columns:
+      - name: hcc_category
+        tests:
+          - not_null
+          - unique

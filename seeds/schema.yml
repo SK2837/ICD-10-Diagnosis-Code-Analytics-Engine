@@ -1,0 +1,11 @@
+version: 2
+
+seeds:
+  - name: icd9_to_icd10_gem
+    columns:
+      - name: icd9_code
+        tests:
+          - not_null
+      - name: icd10_code
+        tests:
+          - not_null

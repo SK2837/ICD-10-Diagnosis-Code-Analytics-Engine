@@ -1,0 +1,14 @@
+version: 2
+
+sources:
+  - name: raw
+    database: ICD10_DB
+    schema: RAW
+    tables:
+      - name: BENEFICIARY_SUMMARY
+      - name: CLAIMS_INPATIENT
+      - name: CLAIMS_OUTPATIENT
+      - name: CLAIMS_CARRIER
+      - name: ICD10_CODES
+      - name: CCS_MAPPINGS
+      - name: HCC_CROSSWALK

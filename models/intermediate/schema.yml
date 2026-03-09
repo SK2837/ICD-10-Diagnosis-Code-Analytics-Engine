@@ -1,0 +1,77 @@
+version: 2
+
+models:
+  - name: int_icd9_to_icd10_map
+    columns:
+      - name: icd9_code
+        tests:
+          - not_null
+          - unique
+          - dbt_expectations.expect_column_values_to_match_regex:
+              arguments:
+                regex: '^[0-9VE][0-9A-Z]{2,4}$'
+      - name: icd10_code
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_match_regex:
+              arguments:
+                regex: '^[A-Z0-9\\.]{3,8}$'
+
+  - name: int_claims_with_diagnoses
+    columns:
+      - name: claim_pk
+        tests:
+          - not_null
+      - name: diagnosis_code
+        tests:
+          - not_null
+      - name: icd9_code
+        tests:
+          - not_null
+
+  - name: int_claims_with_ccs
+    columns:
+      - name: claim_pk
+        tests:
+          - not_null
+      - name: diagnosis_code
+        tests:
+          - not_null
+
+  - name: int_claims_with_hcc
+    columns:
+      - name: claim_pk
+        tests:
+          - not_null
+      - name: diagnosis_code
+        tests:
+          - not_null
+
+  - name: int_beneficiary_conditions
+    columns:
+      - name: beneficiary_id
+        tests:
+          - not_null
+          - unique
+
+  - name: int_claim_cost_by_diagnosis
+    columns:
+      - name: claim_pk
+        tests:
+          - not_null
+      - name: diagnosis_code
+        tests:
+          - not_null
+      - name: allocated_claim_cost
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: -1000000
+                strictly: false
+
+  - name: int_mapping_coverage_by_claim_type
+    columns:
+      - name: claim_type
+        tests:
+          - not_null
+          - unique
