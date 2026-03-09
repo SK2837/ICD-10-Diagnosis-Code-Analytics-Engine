@@ -6,42 +6,42 @@ A production-grade healthcare data warehouse built with **dbt + Snowflake** that
 
 ```mermaid
 flowchart LR
-    A[CMS SynPUF Claims (ICD-9 DX)] --> S
-    B[ICD-10-CM Codes] --> S
-    C[CCS Mappings] --> S
-    D[HCC Crosswalk] --> S
-    E[ICD-9 to ICD-10 GEM] --> S
-    F[HCC Coefficients] --> S
+    A["CMS SynPUF Claims ICD-9 DX"] --> STG
+    B["ICD-10-CM Codes"] --> STG
+    C["CCS Mappings"] --> STG
+    D["HCC Crosswalk"] --> STG
+    E["ICD-9 to ICD-10 GEM"] --> STG
+    F["HCC Coefficients"] --> STG
 
-    subgraph S[Staging Layer]
-        stg_claims_inpatient
-        stg_claims_outpatient
-        stg_beneficiaries
-        stg_icd10_codes
-        stg_ccs_mappings
-        stg_hcc_mappings
-        stg_hcc_coefficients
+    subgraph STG["Staging Layer"]
+        stg_claims_inpatient["stg_claims_inpatient"]
+        stg_claims_outpatient["stg_claims_outpatient"]
+        stg_beneficiaries["stg_beneficiaries"]
+        stg_icd10_codes["stg_icd10_codes"]
+        stg_ccs_mappings["stg_ccs_mappings"]
+        stg_hcc_mappings["stg_hcc_mappings"]
+        stg_hcc_coefficients["stg_hcc_coefficients"]
     end
 
-    subgraph I[Intermediate Layer]
-        int_claims_with_diagnoses
-        int_icd9_to_icd10_map
-        int_claims_with_ccs
-        int_claims_with_hcc
-        int_beneficiary_conditions
-        int_claim_cost_by_diagnosis
-        int_mapping_coverage_by_claim_type
+    subgraph INT["Intermediate Layer"]
+        int_claims_with_diagnoses["int_claims_with_diagnoses"]
+        int_icd9_to_icd10_map["int_icd9_to_icd10_map"]
+        int_claims_with_ccs["int_claims_with_ccs"]
+        int_claims_with_hcc["int_claims_with_hcc"]
+        int_beneficiary_conditions["int_beneficiary_conditions"]
+        int_claim_cost_by_diagnosis["int_claim_cost_by_diagnosis"]
+        int_mapping_coverage_by_claim_type["int_mapping_coverage_by_claim_type"]
     end
 
-    subgraph M[Marts Layer]
-        mart_patient_risk_scores
-        mart_high_cost_conditions
-        mart_diagnosis_category_summary
-        mart_risk_tier_cohorts
-        mart_revenue_leakage_flags
+    subgraph MRT["Marts Layer"]
+        mart_patient_risk_scores["mart_patient_risk_scores"]
+        mart_high_cost_conditions["mart_high_cost_conditions"]
+        mart_diagnosis_category_summary["mart_diagnosis_category_summary"]
+        mart_risk_tier_cohorts["mart_risk_tier_cohorts"]
+        mart_revenue_leakage_flags["mart_revenue_leakage_flags"]
     end
 
-    S --> I --> M
+    STG --> INT --> MRT
 ```
 
 ## Tech Stack
